@@ -101,43 +101,6 @@ export default function Login() {
     }
   };
 
-  const handleAnonymousLogin = async () => {
-    setLoading(true);
-    setError('');
-    try {
-      const cred = await signInAnonymously(auth);
-      // Ensure user document exists for anonymous user
-      const userDocRef = doc(db, 'users', cred.user.uid);
-      const userDoc = await getDoc(userDocRef);
-      if (!userDoc.exists()) {
-        await setDoc(userDocRef, {
-          uid: cred.user.uid,
-          createdAt: serverTimestamp()
-        });
-      }
-      
-      // Create a room immediately
-      const newRoomId = Math.random().toString(36).substring(2, 10);
-      
-      const adjectives = ['Spicy', 'Burnt', 'Sizzling', 'Smoky', 'Crispy', 'Salty', 'Sweet', 'Sour', 'Bitter', 'Tangy', 'Hot', 'Cold', 'Fresh', 'Stale', 'Greasy'];
-      const nouns = ['Soup', 'Toast', 'Steak', 'Salad', 'Pasta', 'Pizza', 'Burger', 'Taco', 'Sushi', 'Curry', 'Noodles', 'Rice', 'Stew', 'Roast', 'Grill'];
-      const randomName = `${adjectives[Math.floor(Math.random() * adjectives.length)]} ${nouns[Math.floor(Math.random() * nouns.length)]}`;
-
-      await setDoc(doc(db, 'rooms', newRoomId), {
-        roomId: newRoomId,
-        creatorId: cred.user.uid,
-        status: 'active',
-        createdAt: serverTimestamp(),
-        kitchenName: randomName
-      });
-      
-      navigate(`/${newRoomId}`);
-    } catch (err: any) {
-      console.error(err);
-      setError('Failed to start anonymous kitchen.');
-      setLoading(false);
-    }
-  };
 
   return (
     <div className="flex flex-col lg:flex-row items-center justify-center h-full min-h-[100dvh] p-6 bg-[#121212] gap-12 lg:gap-24">
@@ -197,16 +160,6 @@ export default function Login() {
           </button>
         </div>
 
-        <div className="mt-4 text-center border-t border-[#333] pt-4">
-          <button
-            type="button"
-            onClick={handleAnonymousLogin}
-            disabled={loading}
-            className="text-gray-400 hover:text-white text-sm font-bold transition-colors"
-          >
-            Start a Kitchen (Anonymous)
-          </button>
-        </div>
 
         <div className="mt-6 text-center">
           <button 
