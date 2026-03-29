@@ -204,28 +204,28 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-[#121212] text-white">
-      <header className="bg-[#1a1a1a] border-b border-[#333] px-4 py-4 flex items-center justify-between sticky top-0 z-10">
+    <div className="flex flex-col h-full bg-[#0a0a0a] text-white">
+      <header className="bg-[#0f0f0f] border-b border-[#222] px-4 py-4 flex items-center justify-between sticky top-0 z-10 shadow-lg">
         <div className="flex items-center gap-2">
           <img 
             src="/logo.png" 
             alt="Logo" 
-            className="w-10 h-10 rounded-full object-cover"
+            className="w-10 h-10 rounded-full object-cover grayscale contrast-125"
             onError={(e) => {
               e.currentTarget.style.display = 'none';
               e.currentTarget.nextElementSibling?.classList.remove('hidden');
             }}
           />
-          <div className="hidden w-8 h-8 bg-[#FF4500] rounded-full flex items-center justify-center shadow-[0_0_10px_rgba(255,69,0,0.4)]">
+          <div className="hidden w-8 h-8 bg-[#991b1b] rounded-full flex items-center justify-center">
             <ChefHat className="w-5 h-5 text-white" />
           </div>
-          <h1 className="font-bold text-lg tracking-wide">The Kitchen</h1>
+          <h1 className="font-black text-lg tracking-tight uppercase">The Kitchen</h1>
         </div>
         <div className="flex items-center gap-2">
           {'Notification' in window && notifyPermission !== 'granted' && (
             <button 
               onClick={requestNotificationPermission} 
-              className="relative z-20 p-2 text-gray-400 hover:text-white hover:bg-[#333] rounded-full transition-colors"
+              className="relative z-20 p-2 text-gray-600 hover:text-white hover:bg-[#1a1a1a] rounded-full transition-colors"
               title="Enable Notifications"
             >
               <BellOff className="w-5 h-5" />
@@ -233,46 +233,48 @@ export default function Dashboard() {
           )}
           {'Notification' in window && notifyPermission === 'granted' && (
             <button 
-              className="relative z-20 p-2 text-[#FF4500] hover:bg-[#333] rounded-full transition-colors cursor-default"
+              className="relative z-20 p-2 text-[#991b1b] hover:bg-[#1a1a1a] rounded-full transition-colors cursor-default"
               title="Notifications Enabled"
             >
               <Bell className="w-5 h-5" />
             </button>
           )}
-          <button onClick={handleLogout} className="p-2 text-gray-400 hover:text-white hover:bg-[#333] rounded-full transition-colors">
+          <button onClick={handleLogout} className="p-2 text-gray-600 hover:text-white hover:bg-[#1a1a1a] rounded-full transition-colors">
             <LogOut className="w-5 h-5" />
           </button>
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto p-4">
+      <main className="flex-1 overflow-y-auto p-4 max-w-2xl mx-auto w-full">
         {username && username !== 'Anonymous' && (
-          <div className="mb-8">
-            <h2 className="text-xs font-bold text-[#FF4500] uppercase tracking-widest mb-3">Your Roast Portal</h2>
-            <div className="bg-gradient-to-br from-[#1a1a1a] to-[#3a1a1a] border-2 border-[#FF4500] rounded-2xl p-5 shadow-[0_0_20px_rgba(255,69,0,0.2)] flex flex-col gap-4">
-              <div className="flex justify-between items-start">
+          <div className="mb-10">
+            <h2 className="text-[10px] font-black text-[#991b1b] uppercase tracking-[0.2em] mb-4">Your Roast Portal</h2>
+            <div className="bg-[#0f0f0f] border-2 border-[#222] rounded-3xl p-6 flex flex-col gap-5 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-[#991b1b]/5 rounded-full -mr-16 -mt-16 blur-3xl" />
+              
+              <div className="flex justify-between items-start relative z-10">
                 <div>
-                  <div className="font-mono text-lg font-bold text-[#FF4500]">
-                    cookmeslow.app/{username}
+                  <div className="font-black text-2xl text-white tracking-tighter">
+                    cookmeslow.app/<span className="text-[#991b1b]">{username}</span>
                   </div>
-                  <div className="text-xs text-gray-400 mt-1 font-medium">
-                    This is your permanent link. Share it to get roasted!
+                  <div className="text-xs text-gray-500 mt-2 font-bold uppercase tracking-wider">
+                    Your permanent roasting link
                   </div>
                 </div>
-                <div className="w-10 h-10 bg-[#FF4500] rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(255,69,0,0.4)]">
+                <div className="w-12 h-12 bg-[#991b1b] rounded-2xl flex items-center justify-center shadow-xl rotate-3">
                   <Share className="w-6 h-6 text-white" />
                 </div>
               </div>
 
-              <div className="text-center mt-2 mb-2">
-                <p className="text-sm text-gray-400">
-                  Anyone who visits this link will land in a <strong className="text-white">direct random kitchen</strong> to roast you.
+              <div className="mt-2 mb-2 relative z-10">
+                <p className="text-sm text-gray-400 leading-relaxed font-medium">
+                  Anyone who visits this link will land in a <strong className="text-white font-black">direct random kitchen</strong> to roast you.
                 </p>
               </div>
               
               <button 
                 onClick={copyPortalLink}
-                className="w-full py-3 px-4 bg-[#FF4500] hover:bg-[#ff571a] text-white font-bold rounded-full transition-all shadow-[0_4px_14px_0_rgba(255,69,0,0.39)] flex items-center justify-center gap-2"
+                className="w-full py-4 px-4 bg-[#991b1b] hover:bg-[#7f1d1d] text-white font-black uppercase tracking-widest rounded-2xl transition-all flex items-center justify-center gap-3 active:scale-[0.98]"
               >
                 {copiedId === 'portal' ? <Check className="w-5 h-5" /> : <Copy className="w-5 h-5" />}
                 {copiedId === 'portal' ? 'Portal Link Copied!' : 'Copy Portal Link'}
@@ -281,73 +283,71 @@ export default function Dashboard() {
           </div>
         )}
 
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-xs font-bold text-gray-500 uppercase tracking-widest">Active Kitchens</h2>
+        <div className="flex items-center justify-between mb-4 px-1">
+          <h2 className="text-[10px] font-black text-gray-600 uppercase tracking-[0.2em]">Active Kitchens</h2>
           <button 
             onClick={createRoom}
             disabled={isCreating}
-            className="text-xs font-bold text-[#FF4500] hover:text-[#ff571a] flex items-center gap-1 transition-colors"
+            className="text-[10px] font-black text-[#991b1b] hover:text-[#7f1d1d] flex items-center gap-1.5 transition-colors uppercase tracking-widest"
           >
-            <Flame className="w-3 h-3" />
-            New Stove
+            <Flame className="w-3.5 h-3.5" />
+            Light New Stove
           </button>
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-4">
           {rooms.length === 0 ? (
-            <div className="text-center py-12 text-gray-500 bg-[#1a1a1a] rounded-3xl border border-[#333] border-dashed">
-              <ChefHat className="w-12 h-12 mx-auto mb-3 opacity-20" />
-              <p className="font-medium">No active stoves</p>
+            <div className="text-center py-16 text-gray-700 bg-[#0f0f0f] rounded-3xl border-2 border-[#1a1a1a] border-dashed">
+              <ChefHat className="w-16 h-16 mx-auto mb-4 opacity-10" />
+              <p className="font-black uppercase tracking-widest text-sm">No active stoves</p>
             </div>
           ) : (
             rooms.map((room) => (
-              <div key={room.roomId} className="bg-gradient-to-br from-[#1a1a1a] to-[#2a1a1a] border border-[#FF4500]/30 rounded-2xl p-5 shadow-[0_0_15px_rgba(255,69,0,0.1)] flex flex-col gap-4">
+              <div key={room.roomId} className="bg-[#0f0f0f] border border-[#222] rounded-3xl p-6 flex flex-col gap-5 hover:border-[#991b1b]/30 transition-colors">
                 <div className="flex justify-between items-start">
                   <div>
-                    <div className="font-mono text-sm font-bold text-[#FF4500] bg-[#FF4500]/10 px-3 py-1 rounded-full inline-block">
+                    <div className="font-black text-lg text-white tracking-tight">
                       {room.kitchenName || room.roomId}
                     </div>
-                    <div className="text-xs text-gray-500 mt-2 font-medium px-1">
+                    <div className="text-[10px] text-gray-600 mt-1 font-black uppercase tracking-widest">
                       Lit {format(room.createdAt, 'MMM d, h:mm a')}
                     </div>
                   </div>
-                  <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-green-500/10 text-green-400 border border-green-500/20">
-                    Hot
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-red-900/10 text-red-700 border border-red-900/20">
+                    Sizzling
                   </span>
                 </div>
 
-                <div className="text-center mt-2 mb-2">
-                  <h3 className="font-bold text-white mb-2 flex items-center justify-center gap-2">
-                    <Share className="w-4 h-4 text-[#FF4500]" />
-                    Invite People to Roast You
-                  </h3>
-                  <p className="text-sm text-gray-400">
+                <div className="mt-1 mb-1">
+                  <p className="text-sm text-gray-500 font-medium leading-relaxed">
                     Your kitchen is open! Share this link on your socials to get anonymous roasts.
                   </p>
                 </div>
                 
-                <button 
-                  onClick={() => copyLink(room.roomId)}
-                  className="w-full py-3 px-4 bg-[#FF4500] hover:bg-[#ff571a] text-white font-bold rounded-full transition-all shadow-[0_4px_14px_0_rgba(255,69,0,0.39)] hover:shadow-[0_6px_20px_rgba(255,69,0,0.23)] flex items-center justify-center gap-2"
-                >
-                  {copiedId === room.roomId ? <Check className="w-5 h-5" /> : <Copy className="w-5 h-5" />}
-                  {copiedId === room.roomId ? 'Link Copied!' : 'Copy Link to Share'}
-                </button>
+                <div className="flex flex-col gap-3">
+                  <button 
+                    onClick={() => copyLink(room.roomId)}
+                    className="w-full py-3.5 px-4 bg-[#1a1a1a] hover:bg-[#222] text-white font-black uppercase tracking-widest rounded-2xl transition-all flex items-center justify-center gap-3 border border-[#333]"
+                  >
+                    {copiedId === room.roomId ? <Check className="w-5 h-5 text-green-600" /> : <Copy className="w-5 h-5" />}
+                    {copiedId === room.roomId ? 'Link Copied!' : 'Copy Link to Share'}
+                  </button>
 
-                <div className="flex gap-2 mt-2">
-                  <button 
-                    onClick={() => navigate(`/${room.roomId}`)}
-                    className="flex-1 bg-[#2a2a2a] hover:bg-[#333] text-white py-2.5 rounded-full text-sm font-bold transition-colors"
-                  >
-                    Enter Kitchen
-                  </button>
-                  <button 
-                    onClick={() => closeRoom(room.roomId)}
-                    className="p-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-full transition-colors aspect-square flex items-center justify-center"
-                    title="Close Kitchen"
-                  >
-                    <Trash2 className="w-5 h-5" />
-                  </button>
+                  <div className="flex gap-3">
+                    <button 
+                      onClick={() => navigate(`/${room.roomId}`)}
+                      className="flex-1 bg-[#991b1b] hover:bg-[#7f1d1d] text-white py-3.5 rounded-2xl text-sm font-black uppercase tracking-widest transition-all active:scale-[0.98]"
+                    >
+                      Enter Kitchen
+                    </button>
+                    <button 
+                      onClick={() => closeRoom(room.roomId)}
+                      className="p-3.5 bg-red-900/10 hover:bg-red-900/20 text-red-700 rounded-2xl transition-colors aspect-square flex items-center justify-center border border-red-900/20"
+                      title="Close Kitchen"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  </div>
                 </div>
               </div>
             ))

@@ -16,14 +16,14 @@ export default function App() {
           <Route path="/" element={<Login />} />
           <Route path="/kitchen" element={
             <div className="flex justify-center h-[100dvh]">
-              <div className="w-full max-w-5xl bg-[#121212] shadow-2xl relative overflow-hidden flex flex-col border-x border-[#333]">
+              <div className="w-full max-w-5xl bg-[#0a0a0a] relative overflow-hidden flex flex-col border-x border-[#111]">
                 <Dashboard />
               </div>
             </div>
           } />
           <Route path="/:roomId" element={
             <div className="flex justify-center h-[100dvh]">
-              <div className="w-full max-w-5xl bg-[#121212] shadow-2xl relative overflow-hidden flex flex-col border-x border-[#333]">
+              <div className="w-full max-w-5xl bg-[#0a0a0a] relative overflow-hidden flex flex-col border-x border-[#111]">
                 <ChatRoom />
               </div>
             </div>

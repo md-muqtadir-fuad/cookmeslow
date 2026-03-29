@@ -33,24 +33,24 @@ const getMessageHeat = (text: string) => {
 
   if (score < 40) return { 
     label: 'MILD', 
-    color: 'text-yellow-500', 
+    color: 'text-yellow-700', 
     iconCount: 1,
     textClass: 'text-[15px]',
     glowClass: ''
   };
   if (score < 100) return { 
     label: 'SPICY', 
-    color: 'text-orange-500', 
+    color: 'text-orange-800', 
     iconCount: 2,
     textClass: 'text-[15px]',
-    glowClass: 'shadow-[0_0_12px_rgba(249,115,22,0.4)] border-orange-500/50'
+    glowClass: 'border-orange-900/50'
   };
   return { 
     label: 'FIRE', 
-    color: 'text-red-500 animate-pulse', 
+    color: 'text-red-900', 
     iconCount: 3,
     textClass: 'text-[15px]',
-    glowClass: 'shadow-[0_0_20px_rgba(239,68,68,0.7)] border-red-500'
+    glowClass: 'border-red-900'
   };
 };
 
@@ -68,7 +68,7 @@ export default function ChatRoom() {
   const [error, setError] = useState('');
   const [isGhosted, setIsGhosted] = useState(false);
   const [replyingTo, setReplyingTo] = useState<Message | null>(null);
-  const [showReactMenu, setShowReactMenu] = useState<string | null>(null);
+  const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null);
   const [heatLevel, setHeatLevel] = useState(0);
   const [copied, setCopied] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -549,20 +549,20 @@ export default function ChatRoom() {
   return (
     <div 
       className="flex flex-col h-full text-white transition-colors duration-1000"
-      style={{ backgroundColor: heatLevel > 0 ? `rgba(255, 69, 0, ${heatLevel * 0.15})` : '#121212' }}
+      style={{ backgroundColor: heatLevel > 0 ? `rgba(153, 27, 27, ${heatLevel * 0.1})` : '#0a0a0a' }}
     >
       {/* Chat Header */}
-      <header className="bg-[#1a1a1a] border-b border-[#333] px-4 py-3 flex items-center justify-between sticky top-0 z-10 shadow-md">
+      <header className="bg-[#0f0f0f] border-b border-[#222] px-4 py-3 flex items-center justify-between sticky top-0 z-10 shadow-lg">
         <div className="flex items-center gap-3">
           {isHost && (
-            <button onClick={() => navigate('/kitchen')} className="p-2 -ml-2 hover:bg-[#333] rounded-full transition-colors text-gray-400 hover:text-white">
+            <button onClick={() => navigate('/kitchen')} className="p-2 -ml-2 hover:bg-[#1a1a1a] rounded-full transition-colors text-gray-500 hover:text-white">
               <ArrowLeft className="w-5 h-5" />
             </button>
           )}
           <img 
             src="/logo.png" 
             alt="Logo" 
-            className="w-10 h-10 rounded-full object-cover hidden sm:block"
+            className="w-10 h-10 rounded-full object-cover hidden sm:block grayscale contrast-125"
             onError={(e) => {
               e.currentTarget.style.display = 'none';
             }}
@@ -574,54 +574,54 @@ export default function ChatRoom() {
                   type="text"
                   value={newRoomName}
                   onChange={(e) => setNewRoomName(e.target.value)}
-                  className="bg-[#121212] border border-[#333] rounded px-2 py-1 text-sm text-white focus:outline-none focus:border-[#FF4500]"
+                  className="bg-[#0a0a0a] border border-[#333] rounded px-2 py-1 text-sm text-white focus:outline-none focus:border-[#991b1b]"
                   placeholder="Kitchen Name"
                   autoFocus
                   onKeyDown={(e) => e.key === 'Enter' && updateRoomName()}
                 />
-                <button onClick={updateRoomName} className="text-green-500 hover:text-green-400">
+                <button onClick={updateRoomName} className="text-green-600 hover:text-green-500">
                   <Check className="w-4 h-4" />
                 </button>
-                <button onClick={() => setIsEditingName(false)} className="text-gray-500 hover:text-gray-400">
+                <button onClick={() => setIsEditingName(false)} className="text-gray-600 hover:text-gray-500">
                   <X className="w-4 h-4" />
                 </button>
               </div>
             ) : (
               <h1 
-                className="font-bold text-lg leading-tight flex items-center gap-2 cursor-pointer hover:text-[#FF4500] transition-colors"
+                className="font-black text-lg leading-tight flex items-center gap-2 cursor-pointer hover:text-[#991b1b] transition-colors tracking-tight"
                 onClick={() => {
                   setNewRoomName(roomName);
                   setIsEditingName(true);
                 }}
                 title="Click to edit name"
               >
-                {isHost ? <ChefHat className="w-5 h-5 text-[#FF4500]" /> : <Ghost className="w-5 h-5 text-gray-400" />}
+                {isHost ? <ChefHat className="w-5 h-5 text-[#991b1b]" /> : <Ghost className="w-5 h-5 text-gray-500" />}
                 {roomName}
               </h1>
             )}
-            <p className="text-xs text-gray-500 font-medium mt-0.5">
-              {isHost ? 'You are the Chef' : 'You are the Roaster'}
+            <p className="text-[10px] text-gray-600 font-black uppercase tracking-widest mt-0.5">
+              {isHost ? 'Executive Chef' : 'Sous Roaster'}
             </p>
           </div>
         </div>
         <div className="flex items-center gap-2 relative">
           <button 
             onClick={() => setShowMenu(!showMenu)}
-            className="p-1.5 bg-[#2a2a2a] hover:bg-[#333] text-gray-300 rounded-full transition-colors flex items-center justify-center"
+            className="p-1.5 bg-[#1a1a1a] hover:bg-[#222] text-gray-400 rounded-full transition-colors flex items-center justify-center"
             title="More Options"
           >
             <MoreVertical className="w-5 h-5" />
           </button>
 
           {showMenu && (
-            <div className="absolute top-full right-0 mt-2 w-48 bg-[#1a1a1a] border border-[#333] rounded-xl shadow-xl overflow-hidden z-50">
+            <div className="absolute top-full right-0 mt-2 w-48 bg-[#0f0f0f] border border-[#222] rounded-xl shadow-2xl overflow-hidden z-50">
               <button
                 onClick={() => {
                   setNewRoomName(roomName);
                   setIsEditingName(true);
                   setShowMenu(false);
                 }}
-                className="w-full text-left px-4 py-3 text-sm text-gray-300 hover:bg-[#2a2a2a] hover:text-white flex items-center gap-3 transition-colors"
+                className="w-full text-left px-4 py-3 text-sm text-gray-400 hover:bg-[#1a1a1a] hover:text-white flex items-center gap-3 transition-colors"
               >
                 <Edit2 className="w-4 h-4" />
                 Edit Kitchen Name
@@ -631,7 +631,7 @@ export default function ChatRoom() {
                   setShowSearch(!showSearch);
                   setShowMenu(false);
                 }}
-                className="w-full text-left px-4 py-3 text-sm text-gray-300 hover:bg-[#2a2a2a] hover:text-white flex items-center gap-3 transition-colors"
+                className="w-full text-left px-4 py-3 text-sm text-gray-400 hover:bg-[#1a1a1a] hover:text-white flex items-center gap-3 transition-colors"
               >
                 <Search className="w-4 h-4" />
                 Search Messages
@@ -642,9 +642,9 @@ export default function ChatRoom() {
                     if (notifyPermission !== 'granted') requestNotificationPermission();
                     setShowMenu(false);
                   }}
-                  className="w-full text-left px-4 py-3 text-sm text-gray-300 hover:bg-[#2a2a2a] hover:text-white flex items-center gap-3 transition-colors"
+                  className="w-full text-left px-4 py-3 text-sm text-gray-400 hover:bg-[#1a1a1a] hover:text-white flex items-center gap-3 transition-colors"
                 >
-                  {notifyPermission === 'granted' ? <Bell className="w-4 h-4 text-[#FF4500]" /> : <BellOff className="w-4 h-4" />}
+                  {notifyPermission === 'granted' ? <Bell className="w-4 h-4 text-[#991b1b]" /> : <BellOff className="w-4 h-4" />}
                   {notifyPermission === 'granted' ? 'Notifications On' : 'Enable Notifications'}
                 </button>
               )}
@@ -653,9 +653,9 @@ export default function ChatRoom() {
                   copyRoomLink();
                   setShowMenu(false);
                 }}
-                className="w-full text-left px-4 py-3 text-sm text-gray-300 hover:bg-[#2a2a2a] hover:text-white flex items-center gap-3 transition-colors"
+                className="w-full text-left px-4 py-3 text-sm text-gray-400 hover:bg-[#1a1a1a] hover:text-white flex items-center gap-3 transition-colors"
               >
-                {copied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
+                {copied ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
                 {copied ? 'Link Copied!' : 'Copy Room Link'}
               </button>
               {isHost && (
@@ -664,7 +664,7 @@ export default function ChatRoom() {
                     closeKitchen();
                     setShowMenu(false);
                   }}
-                  className="w-full text-left px-4 py-3 text-sm text-red-500 hover:bg-red-500/10 flex items-center gap-3 transition-colors border-t border-[#333]"
+                  className="w-full text-left px-4 py-3 text-sm text-red-700 hover:bg-red-900/10 flex items-center gap-3 transition-colors border-t border-[#222]"
                 >
                   <Trash2 className="w-4 h-4" />
                   Close Kitchen
@@ -677,21 +677,21 @@ export default function ChatRoom() {
 
       {/* Search & Filter Bar */}
       {showSearch && (
-        <div className="bg-[#1a1a1a] border-b border-[#333] p-3 flex gap-2 z-10 shadow-sm animate-in slide-in-from-top-2">
+        <div className="bg-[#0f0f0f] border-b border-[#222] p-3 flex gap-2 z-10 shadow-sm animate-in slide-in-from-top-2">
           <div className="relative flex-1">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-600" />
             <input
               type="text"
               placeholder="Search messages..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="w-full bg-[#121212] border border-[#333] rounded-full py-2 pl-9 pr-4 text-sm text-white focus:outline-none focus:border-[#FF4500] transition-colors"
+              className="w-full bg-[#0a0a0a] border border-[#222] rounded-full py-2 pl-9 pr-4 text-sm text-white focus:outline-none focus:border-[#991b1b] transition-colors"
             />
           </div>
           <select
             value={filterType}
             onChange={e => setFilterType(e.target.value as any)}
-            className="bg-[#121212] border border-[#333] rounded-full px-3 py-2 text-sm text-white focus:outline-none focus:border-[#FF4500] transition-colors appearance-none"
+            className="bg-[#0a0a0a] border border-[#222] rounded-full px-3 py-2 text-sm text-white focus:outline-none focus:border-[#991b1b] transition-colors appearance-none"
           >
             <option value="all">All</option>
             <option value="mine">Mine</option>
@@ -701,11 +701,14 @@ export default function ChatRoom() {
       )}
 
       {/* Messages Area */}
-      <main className="flex-1 overflow-y-auto p-4 space-y-4">
+      <main 
+        className="flex-1 overflow-y-auto p-4 space-y-4"
+        onClick={() => setSelectedMessageId(null)}
+      >
         {filteredMessages.length === 0 && (
           <div className="flex justify-center mb-8 mt-4">
-            <div className="bg-[#1a1a1a] border border-[#333] text-gray-400 text-xs py-2 px-4 rounded-xl shadow-sm flex items-center gap-2 max-w-[85%] text-center font-medium">
-              <Flame className="w-4 h-4 text-[#FF4500] shrink-0" />
+            <div className="bg-[#0f0f0f] border border-[#222] text-gray-500 text-xs py-2 px-4 rounded-xl shadow-sm flex items-center gap-2 max-w-[85%] text-center font-medium">
+              <Flame className="w-4 h-4 text-[#991b1b] shrink-0" />
               <span>{messages.length === 0 ? 'The stove is cold. Start roasting!' : 'No messages match your search.'}</span>
             </div>
           </div>
@@ -714,137 +717,119 @@ export default function ChatRoom() {
         {filteredMessages.map((msg) => {
           const isMe = msg.senderId === userId;
           const isMsgHost = msg.isHostMsg;
+          const isSelected = selectedMessageId === msg.id;
           
           return (
-            <div key={msg.id} className={cn("flex items-end gap-2 group", isMe ? "justify-end" : "justify-start")}>
-              
-              {/* Actions for my messages (left side) */}
-              {isMe && (
-                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity mb-2">
-                  <button onClick={() => setShowReactMenu(showReactMenu === msg.id ? null : msg.id)} className="p-1.5 bg-[#2a2a2a] hover:bg-[#333] rounded-full text-gray-400 hover:text-white relative">
-                    <SmilePlus className="w-4 h-4" />
-                    {showReactMenu === msg.id && (
-                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-[#1a1a1a] border border-[#333] rounded-full px-2 py-1 flex gap-1 shadow-xl z-20">
-                        {['🔥', '😂', '💀', '👀'].map(emoji => (
-                          <span key={emoji} onClick={(e) => { e.stopPropagation(); toggleReaction(msg, emoji); setShowReactMenu(null); }} className="cursor-pointer hover:scale-125 transition-transform text-lg">{emoji}</span>
-                        ))}
+            <div key={msg.id} className={cn("flex flex-col gap-1", isMe ? "items-end" : "items-start")}>
+              <div className={cn("flex items-end gap-2 group max-w-[85%]", isMe ? "flex-row-reverse" : "flex-row")}>
+                
+                <div className="flex flex-col max-w-full">
+                  <div className={cn("flex items-center gap-1.5 mb-1 px-1", isMe && "justify-end")}>
+                    {isMsgHost ? (
+                      <>
+                        <ChefHat className="w-3 h-3 text-[#991b1b]" />
+                        <span className="text-[10px] font-bold text-[#991b1b] uppercase tracking-wider">Chef</span>
+                      </>
+                    ) : (
+                      <>
+                        <Ghost className="w-3 h-3 text-gray-600" />
+                        <span className="text-[10px] font-bold text-gray-600 uppercase tracking-wider">Roaster</span>
+                      </>
+                    )}
+                    
+                    <span className="text-[#333] text-[10px] mx-0.5">•</span>
+                    <div className={cn("flex items-center", getMessageHeat(msg.text).color)} title="Heat Level">
+                      {Array.from({ length: getMessageHeat(msg.text).iconCount }).map((_, i) => (
+                        <Flame key={i} className="w-3 h-3" />
+                      ))}
+                      <span className="text-[9px] font-bold ml-0.5 tracking-wider">{getMessageHeat(msg.text).label}</span>
+                    </div>
+                  </div>
+                  
+                  <div 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedMessageId(isSelected ? null : msg.id);
+                    }}
+                    className={cn(
+                      "rounded-2xl px-4 py-2.5 relative transition-all duration-200 cursor-pointer active:scale-[0.98]",
+                      isMsgHost 
+                        ? "bg-[#991b1b] text-white font-bold" 
+                        : "bg-[#1a1a1a] text-gray-200 border border-[#222]",
+                      isMe ? "rounded-tr-sm" : "rounded-tl-sm",
+                      msg.isBurned && !isMsgHost && "border-red-900/50 opacity-60",
+                      isSelected && "ring-2 ring-[#991b1b] ring-offset-2 ring-offset-[#0a0a0a]"
+                    )}
+                  >
+                    {msg.replyTo && (
+                      <div className="mb-2 pl-2 border-l-2 border-white/30 bg-black/20 rounded-r-md p-1.5">
+                        <span className="text-[10px] font-bold text-white/80 block mb-0.5">
+                          Replying to {msg.replyTo.isHostMsg ? 'Chef' : 'Roaster'}
+                        </span>
+                        <p className="text-xs text-white/70 truncate">{msg.replyTo.text}</p>
                       </div>
                     )}
-                  </button>
-                  <button onClick={() => setReplyingTo(msg)} className="p-1.5 bg-[#2a2a2a] hover:bg-[#333] rounded-full text-gray-400 hover:text-white"><Reply className="w-4 h-4" /></button>
-                  <button onClick={() => { navigator.clipboard.writeText(msg.text); }} className="p-1.5 bg-[#2a2a2a] hover:bg-[#333] rounded-full text-gray-400 hover:text-white"><Copy className="w-4 h-4" /></button>
-                  <button onClick={() => deleteMessage(msg.id)} className="p-1.5 bg-[#2a2a2a] hover:bg-red-500/20 rounded-full text-gray-400 hover:text-red-500"><Trash2 className="w-4 h-4" /></button>
-                </div>
-              )}
+                    <p className={cn("leading-relaxed break-words", getMessageHeat(msg.text).textClass)}>{msg.text}</p>
+                    <div className={cn(
+                      "text-[9px] text-right mt-1.5 font-bold",
+                      isMsgHost ? "text-red-200" : "text-gray-600"
+                    )}>
+                      {format(msg.timestamp, 'h:mm a')}
+                    </div>
 
-              {!isMe && isHost && (
-                <button 
-                  onClick={() => toggleBurn(msg.id, msg.isBurned)}
-                  className={cn(
-                    "p-1.5 rounded-full transition-all mb-1",
-                    msg.isBurned ? "bg-red-500/20 text-red-500" : "bg-[#2a2a2a] text-gray-500 hover:text-[#FF4500]"
-                  )}
-                  title="Burn this roast"
-                >
-                  <Flame className="w-4 h-4" />
-                </button>
-              )}
-              
-              <div className="flex flex-col max-w-[75%]">
-                <div className={cn("flex items-center gap-1.5 mb-1 px-1", isMe && "justify-end")}>
-                  {isMsgHost ? (
-                    <>
-                      <ChefHat className="w-3 h-3 text-[#FF4500]" />
-                      <span className="text-[10px] font-bold text-[#FF4500] uppercase tracking-wider">Chef</span>
-                    </>
-                  ) : (
-                    <>
-                      <Ghost className="w-3 h-3 text-gray-500" />
-                      <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Roaster</span>
-                    </>
-                  )}
-                  
-                  <span className="text-[#444] text-[10px] mx-0.5">•</span>
-                  <div className={cn("flex items-center", getMessageHeat(msg.text).color)} title="Heat Level">
-                    {Array.from({ length: getMessageHeat(msg.text).iconCount }).map((_, i) => (
-                      <Flame key={i} className="w-3 h-3" />
-                    ))}
-                    <span className="text-[9px] font-bold ml-0.5 tracking-wider">{getMessageHeat(msg.text).label}</span>
+                    {/* Quick Action Menu (Messenger style) */}
+                    {isSelected && (
+                      <div className={cn(
+                        "absolute -top-12 bg-[#1a1a1a] border border-[#333] rounded-full px-2 py-1.5 flex items-center gap-1 shadow-2xl z-30 animate-in fade-in zoom-in-95 duration-150",
+                        isMe ? "right-0" : "left-0"
+                      )}>
+                        <div className="flex gap-1 pr-2 border-r border-[#333] mr-1">
+                          {['🔥', '😂', '💀', '👀'].map(emoji => (
+                            <button 
+                              key={emoji} 
+                              onClick={(e) => { e.stopPropagation(); toggleReaction(msg, emoji); setSelectedMessageId(null); }} 
+                              className="w-8 h-8 flex items-center justify-center hover:bg-[#2a2a2a] rounded-full transition-transform hover:scale-125 text-lg"
+                            >
+                              {emoji}
+                            </button>
+                          ))}
+                        </div>
+                        <button onClick={(e) => { e.stopPropagation(); setReplyingTo(msg); setSelectedMessageId(null); }} className="p-2 hover:bg-[#2a2a2a] rounded-full text-gray-400 hover:text-white" title="Reply"><Reply className="w-4 h-4" /></button>
+                        <button onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(msg.text); setSelectedMessageId(null); }} className="p-2 hover:bg-[#2a2a2a] rounded-full text-gray-400 hover:text-white" title="Copy"><Copy className="w-4 h-4" /></button>
+                        {isMe && (
+                          <button onClick={(e) => { e.stopPropagation(); deleteMessage(msg.id); setSelectedMessageId(null); }} className="p-2 hover:bg-red-900/20 rounded-full text-gray-400 hover:text-red-500" title="Delete"><Trash2 className="w-4 h-4" /></button>
+                        )}
+                        {!isMe && isHost && (
+                          <button onClick={(e) => { e.stopPropagation(); toggleBurn(msg.id, msg.isBurned); setSelectedMessageId(null); }} className="p-2 hover:bg-red-900/20 rounded-full text-gray-400 hover:text-red-500" title="Burn"><Flame className="w-4 h-4" /></button>
+                        )}
+                      </div>
+                    )}
                   </div>
-                </div>
-                
-                <div 
-                  className={cn(
-                    "rounded-2xl px-4 py-2.5 shadow-sm relative transition-all duration-300",
-                    isMsgHost 
-                      ? "bg-[#FF4500] text-white" 
-                      : "bg-[#2a2a2a] text-gray-100 border border-[#333]",
-                    isMe ? "rounded-tr-sm" : "rounded-tl-sm",
-                    msg.isBurned && !isMsgHost && "shadow-[0_0_15px_rgba(220,38,38,0.5)] border-red-500/50",
-                    !msg.isBurned && getMessageHeat(msg.text).glowClass
-                  )}
-                >
-                  {msg.replyTo && (
-                    <div className="mb-2 pl-2 border-l-2 border-white/30 bg-black/10 rounded-r-md p-1.5">
-                      <span className="text-[10px] font-bold text-white/80 block mb-0.5">
-                        Replying to {msg.replyTo.isHostMsg ? 'Chef' : 'Roaster'}
-                      </span>
-                      <p className="text-xs text-white/70 truncate">{msg.replyTo.text}</p>
+
+                  {/* Reactions Display */}
+                  {msg.reactions && Object.keys(msg.reactions).length > 0 && (
+                    <div className={cn("flex flex-wrap gap-1 mt-1.5", isMe ? "justify-end" : "justify-start")}>
+                      {(Object.entries(msg.reactions) as [string, string[]][]).map(([emoji, users]) => (
+                        users.length > 0 && (
+                          <button 
+                            key={emoji}
+                            onClick={(e) => { e.stopPropagation(); toggleReaction(msg, emoji); }}
+                            className={cn(
+                              "px-1.5 py-0.5 rounded-full text-[11px] flex items-center gap-1 border transition-colors",
+                              users.includes(userId) 
+                                ? "bg-[#991b1b]/20 border-[#991b1b]/50 text-[#991b1b]" 
+                                : "bg-[#1a1a1a] border-[#222] text-gray-500 hover:border-gray-600"
+                            )}
+                          >
+                            <span>{emoji}</span>
+                            <span className="font-bold">{users.length}</span>
+                          </button>
+                        )
+                      ))}
                     </div>
                   )}
-                  <p className={cn("leading-relaxed break-words", getMessageHeat(msg.text).textClass)}>{msg.text}</p>
-                  <div className={cn(
-                    "text-[9px] text-right mt-1.5 font-bold",
-                    isMsgHost ? "text-orange-200" : "text-gray-500"
-                  )}>
-                    {format(msg.timestamp, 'h:mm a')}
-                  </div>
                 </div>
-
-                {/* Reactions Display */}
-                {msg.reactions && Object.keys(msg.reactions).length > 0 && (
-                  <div className={cn("flex flex-wrap gap-1 mt-1.5", isMe ? "justify-end" : "justify-start")}>
-                    {(Object.entries(msg.reactions) as [string, string[]][]).map(([emoji, users]) => (
-                      users.length > 0 && (
-                        <button 
-                          key={emoji}
-                          onClick={() => toggleReaction(msg, emoji)}
-                          className={cn(
-                            "px-1.5 py-0.5 rounded-full text-[11px] flex items-center gap-1 border transition-colors",
-                            users.includes(userId) 
-                              ? "bg-[#FF4500]/20 border-[#FF4500]/50 text-[#FF4500]" 
-                              : "bg-[#2a2a2a] border-[#333] text-gray-400 hover:border-gray-500"
-                          )}
-                        >
-                          <span>{emoji}</span>
-                          <span className="font-bold">{users.length}</span>
-                        </button>
-                      )
-                    ))}
-                  </div>
-                )}
               </div>
-
-              {/* Actions for others' messages (right side) */}
-              {!isMe && (
-                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity mb-2">
-                  <button onClick={() => { navigator.clipboard.writeText(msg.text); }} className="p-1.5 bg-[#2a2a2a] hover:bg-[#333] rounded-full text-gray-400 hover:text-white"><Copy className="w-4 h-4" /></button>
-                  <button onClick={() => setReplyingTo(msg)} className="p-1.5 bg-[#2a2a2a] hover:bg-[#333] rounded-full text-gray-400 hover:text-white"><Reply className="w-4 h-4" /></button>
-                  <button onClick={() => setShowReactMenu(showReactMenu === msg.id ? null : msg.id)} className="p-1.5 bg-[#2a2a2a] hover:bg-[#333] rounded-full text-gray-400 hover:text-white relative">
-                    <SmilePlus className="w-4 h-4" />
-                    {showReactMenu === msg.id && (
-                      <div className="absolute bottom-full right-0 mb-2 bg-[#1a1a1a] border border-[#333] rounded-full px-2 py-1 flex gap-1 shadow-xl z-20">
-                        {['🔥', '😂', '💀', '👀'].map(emoji => (
-                          <span key={emoji} onClick={(e) => { e.stopPropagation(); toggleReaction(msg, emoji); setShowReactMenu(null); }} className="cursor-pointer hover:scale-125 transition-transform text-lg">{emoji}</span>
-                        ))}
-                      </div>
-                    )}
-                  </button>
-                  {isHost && (
-                    <button onClick={() => deleteMessage(msg.id)} className="p-1.5 bg-[#2a2a2a] hover:bg-red-500/20 rounded-full text-gray-400 hover:text-red-500"><Trash2 className="w-4 h-4" /></button>
-                  )}
-                </div>
-              )}
             </div>
           );
         })}
@@ -853,41 +838,41 @@ export default function ChatRoom() {
 
       {/* Typing Indicator */}
       {typingUsers.filter(id => id !== userId).length > 0 && (
-        <div className="px-4 py-1 text-xs text-gray-400 italic bg-[#121212]">
+        <div className="px-4 py-1 text-[10px] text-gray-600 font-bold uppercase tracking-widest bg-[#0a0a0a] border-t border-[#111]">
           {typingUsers.filter(id => id !== userId).length === 1 
-            ? "Someone is typing..." 
-            : "Multiple people are typing..."}
+            ? "Someone is roasting..." 
+            : "Multiple people are roasting..."}
         </div>
       )}
 
       {/* Input Area */}
-      <footer className="bg-[#1a1a1a] border-t border-[#333] p-3 pb-safe flex flex-col gap-2">
+      <footer className="bg-[#0f0f0f] border-t border-[#222] p-3 pb-safe flex flex-col gap-2">
         {replyingTo && (
-          <div className="flex items-center justify-between bg-[#2a2a2a] p-2 rounded-xl border border-[#333] mx-1">
+          <div className="flex items-center justify-between bg-[#1a1a1a] p-2 rounded-xl border border-[#222] mx-1">
             <div className="flex flex-col overflow-hidden">
-              <span className="text-[10px] font-bold text-[#FF4500] uppercase tracking-wider mb-0.5">
+              <span className="text-[10px] font-black text-[#991b1b] uppercase tracking-widest mb-0.5">
                 Replying to {replyingTo.isHostMsg ? 'Chef' : 'Roaster'}
               </span>
-              <span className="text-xs text-gray-300 truncate">{replyingTo.text}</span>
+              <span className="text-xs text-gray-400 truncate">{replyingTo.text}</span>
             </div>
-            <button onClick={() => setReplyingTo(null)} className="p-1.5 text-gray-500 hover:text-white rounded-full hover:bg-[#333] transition-colors">
+            <button onClick={() => setReplyingTo(null)} className="p-1.5 text-gray-600 hover:text-white rounded-full hover:bg-[#222] transition-colors">
               <X className="w-4 h-4" />
             </button>
           </div>
         )}
         <form onSubmit={sendMessage} className="flex gap-2 items-center">
-          <div className="flex-1 bg-[#121212] rounded-3xl border border-[#FF4500] focus-within:border-[#ff571a] transition-colors overflow-hidden flex flex-col shadow-[0_0_10px_rgba(255,69,0,0.1)]">
+          <div className="flex-1 bg-[#0a0a0a] rounded-3xl border border-[#222] focus-within:border-[#991b1b] transition-colors overflow-hidden flex flex-col">
             <input
               type="text"
               value={inputText}
               onChange={handleTextChange}
               placeholder="Drop a roast..."
-              className="w-full px-5 py-3.5 outline-none bg-transparent text-white placeholder-gray-600 font-medium"
+              className="w-full px-5 py-3.5 outline-none bg-transparent text-white placeholder-gray-700 font-bold"
             />
             
             {/* Heat Meter */}
             <div className="px-5 pb-3 flex flex-col gap-1.5">
-              <div className="h-1.5 w-full bg-[#2a2a2a] rounded-full overflow-hidden">
+              <div className="h-1 w-full bg-[#1a1a1a] rounded-full overflow-hidden">
                 <div 
                   className={cn("h-full transition-all duration-300", getHeatColor(inputText.length))}
                   style={{ width: `${Math.min((inputText.length / MAX_CHARS) * 100, 100)}%` }}
@@ -895,8 +880,8 @@ export default function ChatRoom() {
               </div>
               <div className="flex justify-end">
                 <span className={cn(
-                  "text-[10px] font-bold tracking-wider",
-                  inputText.length > MAX_CHARS ? "text-red-500" : "text-gray-500"
+                  "text-[9px] font-black tracking-widest",
+                  inputText.length > MAX_CHARS ? "text-red-700" : "text-gray-700"
                 )}>
                   {inputText.length}/{MAX_CHARS}
                 </span>
@@ -907,10 +892,10 @@ export default function ChatRoom() {
           <button
             type="submit"
             disabled={!inputText.trim() || inputText.length > MAX_CHARS}
-            className="h-[60px] px-6 shrink-0 bg-[#FF4500] hover:bg-[#ff571a] disabled:bg-[#2a2a2a] disabled:text-gray-500 disabled:cursor-not-allowed text-white rounded-full flex flex-row items-center justify-center gap-2 shadow-[0_4px_14px_0_rgba(255,69,0,0.39)] disabled:shadow-none transition-all"
+            className="h-[60px] px-6 shrink-0 bg-[#991b1b] hover:bg-[#7f1d1d] disabled:bg-[#1a1a1a] disabled:text-gray-700 disabled:cursor-not-allowed text-white rounded-full flex flex-row items-center justify-center gap-2 transition-all active:scale-95"
           >
             <Flame className="w-5 h-5" />
-            <span className="text-sm font-bold uppercase tracking-wider">Serve</span>
+            <span className="text-sm font-black uppercase tracking-widest">Serve</span>
           </button>
         </form>
       </footer>
