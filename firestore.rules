@@ -1,0 +1,145 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    // Collection: users
+    // Document ID: {username}
+    // Fields:
+    //   - uid: string (required)
+    //   - createdAt: timestamp (required)
+    //
+    // Collection: rooms
+    // Document ID: {roomId}
+    // Fields:
+    //   - roomId: string (required)
+    //   - creatorId: string (required, immutable)
+    //   - guestId: string (optional)
+    //   - status: string (required, 'active' or 'closed')
+    //   - createdAt: timestamp (required, immutable)
+    //   - kitchenName: string (optional)
+    //
+    // Collection: rooms/{roomId}/messages
+    // Document ID: {messageId}
+    // Fields:
+    //   - text: string (required, max 100 chars)
+    //   - senderId: string (required, immutable)
+    //   - timestamp: timestamp (required, immutable)
+    //   - isRead: boolean (required)
+    //   - isBurned: boolean (required)
+    //   - reactions: map (optional)
+    //   - replyTo: map (optional)
+    // ===============================================================
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isRoomHost(roomId) {
+      let roomHostId = get(/databases/$(database)/documents/rooms/$(roomId)).data.creatorId;
+      return isAuthenticated() && roomHostId == request.auth.uid;
+    }
+
+    function isDocOwner() {
+      return isAuthenticated() && resource.data.creatorId == request.auth.uid;
+    }
+
+    function isGuest() {
+      return isAuthenticated() && resource.data.guestId == request.auth.uid;
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    function areImmutableFieldsUnchanged(fields) {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny(fields);
+    }
+
+    function isValidUser(data) {
+      return hasOnlyAllowedFields(['uid', 'createdAt']) &&
+             hasRequiredFields(['uid', 'createdAt']) &&
+             data.uid is string && data.uid.size() > 0 && data.uid.size() <= 128 &&
+             data.createdAt is timestamp;
+    }
+
+    function isValidRoom(data) {
+      return hasOnlyAllowedFields(['roomId', 'creatorId', 'guestId', 'status', 'createdAt', 'kitchenName', 'typing']) &&
+             hasRequiredFields(['roomId', 'creatorId', 'status', 'createdAt']) &&
+             data.roomId is string && data.roomId.size() > 0 && data.roomId.size() <= 50 &&
+             data.creatorId is string && data.creatorId.size() > 0 && data.creatorId.size() <= 128 &&
+             (!('guestId' in data) || (data.guestId is string && data.guestId.size() > 0 && data.guestId.size() <= 128)) &&
+             data.status in ['active', 'closed'] &&
+             data.createdAt is timestamp &&
+             (!('kitchenName' in data) || (data.kitchenName is string && data.kitchenName.size() > 0 && data.kitchenName.size() <= 100)) &&
+             (!('typing' in data) || data.typing is list);
+    }
+
+    function isValidMessage(data) {
+      let allowedFields = ['text', 'senderId', 'timestamp', 'isRead', 'isBurned', 'reactions', 'replyTo', 'isHostMsg'];
+      let requiredFields = ['text', 'senderId', 'timestamp', 'isRead', 'isBurned'];
+      return hasOnlyAllowedFields(allowedFields) &&
+             hasRequiredFields(requiredFields) &&
+             data.text is string && data.text.size() > 0 && data.text.size() <= 100 &&
+             data.senderId is string && data.senderId.size() > 0 && data.senderId.size() <= 128 &&
+             data.timestamp is timestamp &&
+             data.isRead is bool &&
+             data.isBurned is bool &&
+             (!('reactions' in data) || data.reactions is map) &&
+             (!('replyTo' in data) || data.replyTo is map) &&
+             (!('isHostMsg' in data) || data.isHostMsg is bool);
+    }
+
+    match /users/{username} {
+      allow read: if true;
+      allow create: if isAuthenticated() && 
+                    isValidUser(request.resource.data) && 
+                    request.resource.data.uid == request.auth.uid;
+    }
+
+    match /rooms/{roomId} {
+      allow read: if isAuthenticated();
+      
+      allow create: if isAuthenticated() && 
+                    isValidRoom(request.resource.data) && 
+                    request.resource.data.creatorId == request.auth.uid &&
+                    request.resource.data.roomId == roomId;
+                    
+      allow update: if isAuthenticated() && 
+                    isValidRoom(request.resource.data) &&
+                    areImmutableFieldsUnchanged(['roomId', 'creatorId', 'createdAt']) &&
+                    (
+                      isDocOwner() ||
+                      (isGuest() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['typing', 'kitchenName'])) ||
+                      (!('guestId' in resource.data) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['typing', 'guestId'])) ||
+                      request.resource.data.diff(resource.data).affectedKeys().hasOnly(['typing'])
+                    );
+                    
+      allow delete: if isAuthenticated() && isDocOwner();
+
+      match /messages/{messageId} {
+        allow read: if isAuthenticated();
+        
+        allow create: if isAuthenticated() &&
+                      isValidMessage(request.resource.data) &&
+                      request.resource.data.senderId == request.auth.uid &&
+                      get(/databases/$(database)/documents/rooms/$(roomId)).data.status == 'active';
+                      
+        allow update: if isAuthenticated() &&
+                      isValidMessage(request.resource.data) &&
+                      (
+                        (isRoomHost(roomId) && areImmutableFieldsUnchanged(['text', 'senderId', 'timestamp', 'replyTo'])) ||
+                        areImmutableFieldsUnchanged(['text', 'senderId', 'timestamp', 'isRead', 'isBurned', 'replyTo'])
+                      );
+                      
+        allow delete: if isAuthenticated() && (isRoomHost(roomId) || resource.data.senderId == request.auth.uid);
+      }
+    }
+  }
+}

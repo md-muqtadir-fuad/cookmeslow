@@ -1,0 +1,67 @@
+{
+  "entities": {
+    "Room": {
+      "title": "Room",
+      "description": "A chat room hosted by a registered user.",
+      "type": "object",
+      "properties": {
+        "roomId": {
+          "type": "string",
+          "description": "The unique identifier for the room."
+        },
+        "hostId": {
+          "type": "string",
+          "description": "The UID of the user who created the room."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["active", "closed"],
+          "description": "The current status of the room."
+        },
+        "createdAt": {
+          "type": "timestamp",
+          "description": "The time the room was created."
+        }
+      },
+      "required": ["roomId", "hostId", "status", "createdAt"]
+    },
+    "Message": {
+      "title": "Message",
+      "description": "A message sent within a chat room.",
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": "The content of the message. Max 200 characters."
+        },
+        "senderId": {
+          "type": "string",
+          "description": "The UID of the user who sent the message."
+        },
+        "timestamp": {
+          "type": "timestamp",
+          "description": "The time the message was sent."
+        },
+        "isRead": {
+          "type": "boolean",
+          "description": "Whether the message has been read."
+        }
+      },
+      "required": ["text", "senderId", "timestamp", "isRead"]
+    }
+  },
+  "firestore": {
+    "rooms/{roomId}": {
+      "schema": {
+        "$ref": "#/entities/Room"
+      },
+      "description": "Collection of chat rooms."
+    },
+    "rooms/{roomId}/messages/{messageId}": {
+      "schema": {
+        "$ref": "#/entities/Message"
+      },
+      "description": "Sub-collection of messages within a chat room."
+    }
+  }
+}
