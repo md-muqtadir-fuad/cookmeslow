@@ -154,7 +154,7 @@ export default function Dashboard() {
         createdAt: serverTimestamp(),
         kitchenName: `${username === 'Anonymous' ? 'Anonymous' : username}'s Kitchen`
       });
-      navigate(`/kitchen/${newRoomId}`);
+      navigate(`/${newRoomId}`);
     } catch (error) {
       console.error("Error creating room:", error);
       alert("Failed to light the stove. Please check your connection and try again.");
@@ -178,8 +178,16 @@ export default function Dashboard() {
     }
   };
 
+  const copyPortalLink = () => {
+    if (!username || username === 'Anonymous') return;
+    const link = `${window.location.origin}/${username}`;
+    navigator.clipboard.writeText(link);
+    setCopiedId('portal');
+    setTimeout(() => setCopiedId(null), 2000);
+  };
+
   const copyLink = (roomId: string) => {
-    const link = `${window.location.origin}/kitchen/${roomId}`;
+    const link = `${window.location.origin}/${roomId}`;
     navigator.clipboard.writeText(link);
     setCopiedId(roomId);
     setTimeout(() => setCopiedId(null), 2000);
@@ -238,21 +246,54 @@ export default function Dashboard() {
       </header>
 
       <main className="flex-1 overflow-y-auto p-4">
-        <button 
-          onClick={createRoom}
-          disabled={isCreating}
-          className="w-full py-3.5 px-4 bg-[#FF4500] hover:bg-[#ff571a] disabled:bg-[#FF4500]/50 disabled:cursor-not-allowed text-white font-bold rounded-full shadow-[0_4px_14px_0_rgba(255,69,0,0.39)] disabled:shadow-none transition-all flex items-center justify-center gap-2 mb-6"
-        >
-          {isCreating ? (
-            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-          ) : (
-            <Flame className="w-5 h-5" />
-          )}
-          {isCreating ? 'Starting...' : 'Start a Kitchen'}
-        </button>
+        {username && username !== 'Anonymous' && (
+          <div className="mb-8">
+            <h2 className="text-xs font-bold text-[#FF4500] uppercase tracking-widest mb-3">Your Roast Portal</h2>
+            <div className="bg-gradient-to-br from-[#1a1a1a] to-[#3a1a1a] border-2 border-[#FF4500] rounded-2xl p-5 shadow-[0_0_20px_rgba(255,69,0,0.2)] flex flex-col gap-4">
+              <div className="flex justify-between items-start">
+                <div>
+                  <div className="font-mono text-lg font-bold text-[#FF4500]">
+                    cookmeslow.app/{username}
+                  </div>
+                  <div className="text-xs text-gray-400 mt-1 font-medium">
+                    This is your permanent link. Share it to get roasted!
+                  </div>
+                </div>
+                <div className="w-10 h-10 bg-[#FF4500] rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(255,69,0,0.4)]">
+                  <Share className="w-6 h-6 text-white" />
+                </div>
+              </div>
+
+              <div className="text-center mt-2 mb-2">
+                <p className="text-sm text-gray-400">
+                  Anyone who visits this link will land in a <strong className="text-white">direct random kitchen</strong> to roast you.
+                </p>
+              </div>
+              
+              <button 
+                onClick={copyPortalLink}
+                className="w-full py-3 px-4 bg-[#FF4500] hover:bg-[#ff571a] text-white font-bold rounded-full transition-all shadow-[0_4px_14px_0_rgba(255,69,0,0.39)] flex items-center justify-center gap-2"
+              >
+                {copiedId === 'portal' ? <Check className="w-5 h-5" /> : <Copy className="w-5 h-5" />}
+                {copiedId === 'portal' ? 'Portal Link Copied!' : 'Copy Portal Link'}
+              </button>
+            </div>
+          </div>
+        )}
+
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-xs font-bold text-gray-500 uppercase tracking-widest">Active Kitchens</h2>
+          <button 
+            onClick={createRoom}
+            disabled={isCreating}
+            className="text-xs font-bold text-[#FF4500] hover:text-[#ff571a] flex items-center gap-1 transition-colors"
+          >
+            <Flame className="w-3 h-3" />
+            New Stove
+          </button>
+        </div>
 
         <div className="space-y-3">
-          <h2 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Active Stoves</h2>
           {rooms.length === 0 ? (
             <div className="text-center py-12 text-gray-500 bg-[#1a1a1a] rounded-3xl border border-[#333] border-dashed">
               <ChefHat className="w-12 h-12 mx-auto mb-3 opacity-20" />

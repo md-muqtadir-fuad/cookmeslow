@@ -121,7 +121,42 @@ export default function ChatRoom() {
         
         if (!isMounted) return;
 
-        if (!roomSnap.exists() || roomSnap.data().status !== 'active') {
+        // Portal Logic: If room doesn't exist, check if it's a username
+        if (!roomSnap.exists()) {
+          const userDocRef = doc(db, 'users', roomId);
+          const userDocSnap = await getDoc(userDocRef);
+          
+          if (userDocSnap.exists()) {
+            const targetUserUid = userDocSnap.data().uid;
+            
+            // Ensure visitor is signed in anonymously
+            let currentUserId = auth.currentUser?.uid;
+            if (!currentUserId) {
+              const cred = await signInAnonymously(auth);
+              currentUserId = cred.user.uid;
+            }
+            
+            // Create a new random room for this visitor
+            const newRoomId = Math.random().toString(36).substring(2, 10);
+            await setDoc(doc(db, 'rooms', newRoomId), {
+              roomId: newRoomId,
+              creatorId: targetUserUid,
+              guestId: currentUserId,
+              status: 'active',
+              createdAt: serverTimestamp(),
+              kitchenName: `${roomId}'s Kitchen`
+            });
+            
+            navigate(`/${newRoomId}`, { replace: true });
+            return;
+          }
+
+          setError('Room not found or closed');
+          setLoading(false);
+          return;
+        }
+
+        if (roomSnap.data().status !== 'active') {
           setError('Room not found or closed');
           setLoading(false);
           return;

@@ -21,7 +21,7 @@ export default function App() {
               </div>
             </div>
           } />
-          <Route path="/kitchen/:roomId" element={
+          <Route path="/:roomId" element={
             <div className="flex justify-center h-[100dvh]">
               <div className="w-full max-w-5xl bg-[#121212] shadow-2xl relative overflow-hidden flex flex-col border-x border-[#333]">
                 <ChatRoom />
