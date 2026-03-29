@@ -142,13 +142,17 @@ export default function Dashboard() {
     setIsCreating(true);
     const newRoomId = Math.random().toString(36).substring(2, 10);
     
+    const adjectives = ['Spicy', 'Burnt', 'Sizzling', 'Smoky', 'Crispy', 'Salty', 'Sweet', 'Sour', 'Bitter', 'Tangy', 'Hot', 'Cold', 'Fresh', 'Stale', 'Greasy'];
+    const nouns = ['Soup', 'Toast', 'Steak', 'Salad', 'Pasta', 'Pizza', 'Burger', 'Taco', 'Sushi', 'Curry', 'Noodles', 'Rice', 'Stew', 'Roast', 'Grill'];
+    const randomName = `${adjectives[Math.floor(Math.random() * adjectives.length)]} ${nouns[Math.floor(Math.random() * nouns.length)]}`;
+
     try {
       await setDoc(doc(db, 'rooms', newRoomId), {
         roomId: newRoomId,
         creatorId: userId,
         status: 'active',
         createdAt: serverTimestamp(),
-        kitchenName: `${username === 'Anonymous' ? 'Anonymous' : username}'s Kitchen`
+        kitchenName: randomName
       });
       navigate(`/${newRoomId}`);
     } catch (error) {

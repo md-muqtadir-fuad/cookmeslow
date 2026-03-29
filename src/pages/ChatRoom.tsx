@@ -116,19 +116,35 @@ export default function ChatRoom() {
 
     const setupAuthAndRoom = async () => {
       try {
-        // 1. Check if this is a portal link (username) first (public read)
+        // 1. Wait for auth state to initialize
+        let user = await new Promise<any>((resolve) => {
+          const unsubscribe = onAuthStateChanged(auth, (u) => {
+            unsubscribe();
+            resolve(u);
+          });
+        });
+
+        // 2. Check if this is a portal link (username) first (public read)
         const userDocRef = doc(db, 'users', roomId);
         const userDocSnap = await getDoc(userDocRef);
         
         if (userDocSnap.exists()) {
           const targetUserUid = userDocSnap.data().uid;
           
-          // Ensure visitor is signed in anonymously
-          let currentUserId = auth.currentUser?.uid;
-          if (!currentUserId) {
-            const cred = await signInAnonymously(auth);
-            currentUserId = cred.user.uid;
+          // Ensure visitor is signed in (anonymously if not already logged in)
+          if (!user) {
+            try {
+              const cred = await signInAnonymously(auth);
+              user = cred.user;
+            } catch (authErr) {
+              console.error("Auth failed", authErr);
+              setError('Authentication failed');
+              setLoading(false);
+              return;
+            }
           }
+          
+          const currentUserId = user.uid;
           
           // Create a new random room for this visitor
           const newRoomId = Math.random().toString(36).substring(2, 10);
@@ -150,9 +166,8 @@ export default function ChatRoom() {
           return;
         }
 
-        // 2. If not a username, it must be a room ID.
-        // We MUST be authenticated to read room data (per security rules)
-        let user = auth.currentUser;
+        // 3. If not a username, it must be a room ID.
+        // Ensure user is signed in
         if (!user) {
           try {
             const cred = await signInAnonymously(auth);
@@ -176,52 +191,34 @@ export default function ChatRoom() {
           return;
         }
 
-        const creatorId = roomSnap.data().creatorId;
+        const roomData = roomSnap.data();
+        const creatorId = roomData.creatorId;
         setRoomHostId(creatorId);
+        setUserId(user.uid);
         
-        unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
+        const isUserHost = user.uid === creatorId;
+        setIsHost(isUserHost);
+        
+        // If not host, set as guestId if not already set
+        if (!isUserHost && !roomData.guestId) {
+          try {
+            await updateDoc(roomRef, { guestId: user.uid });
+          } catch (e) {
+            console.error("Failed to set guestId", e);
+          }
+        }
+        
+        setLoading(false);
+
+        // Set up auth listener for future changes (like logging out)
+        unsubscribeAuth = onAuthStateChanged(auth, (u) => {
           if (!isMounted) return;
-          if (user) {
-            setUserId(user.uid);
-            const isUserHost = user.uid === creatorId;
-            setIsHost(isUserHost);
-            
-            // If not host, set as guestId if not already set
-            if (!isUserHost && !roomSnap.data().guestId) {
-              try {
-                await updateDoc(roomRef, { guestId: user.uid });
-              } catch (e) {
-                console.error("Failed to set guestId", e);
-              }
-            }
-            setLoading(false);
+          if (u) {
+            setUserId(u.uid);
+            setIsHost(u.uid === creatorId);
           } else {
-            if (isSigningIn) return;
-            isSigningIn = true;
-            try {
-              const cred = await signInAnonymously(auth);
-              if (isMounted) {
-                setUserId(cred.user.uid);
-                setIsHost(false);
-                // Set as guestId
-                if (!roomSnap.data().guestId) {
-                  try {
-                    await updateDoc(roomRef, { guestId: cred.user.uid });
-                  } catch (e) {
-                    console.error("Failed to set guestId", e);
-                  }
-                }
-                setLoading(false);
-              }
-            } catch (err) {
-              console.error("Error signing in anonymously:", err);
-              if (isMounted) {
-                setError('Failed to join kitchen');
-                setLoading(false);
-              }
-            } finally {
-              isSigningIn = false;
-            }
+            // If user logs out, they might need to sign in anonymously to keep viewing
+            // but for now we just let the component handle it or redirect
           }
         });
       } catch (err) {
