@@ -16,7 +16,7 @@ export default function Login() {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
+      if (user && !user.isAnonymous) {
         navigate('/kitchen');
       }
     });
@@ -126,7 +126,7 @@ export default function Login() {
         kitchenName: `Anonymous's Kitchen`
       });
       
-      navigate(`/kitchen/${newRoomId}`);
+      navigate(`/${newRoomId}`);
     } catch (err: any) {
       console.error(err);
       setError('Failed to start anonymous kitchen.');

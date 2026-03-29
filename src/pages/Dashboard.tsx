@@ -46,28 +46,24 @@ export default function Dashboard() {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (!user) {
+      if (!user || user.isAnonymous) {
         navigate('/');
       } else {
         setUserId(user.uid);
-        if (user.isAnonymous) {
-          setUsername('Anonymous');
+        // Fetch username
+        const q = query(collection(db, 'users'), where('uid', '==', user.uid));
+        const snap = await getDocs(q);
+        if (!snap.empty) {
+          setUsername(snap.docs[0].id);
         } else {
-          // Fetch username
-          const q = query(collection(db, 'users'), where('uid', '==', user.uid));
-          const snap = await getDocs(q);
-          if (!snap.empty) {
-            setUsername(snap.docs[0].id);
+          // If no username found, they might be from an old session
+          const localUsername = localStorage.getItem('cookmeslow_username');
+          if (localUsername) {
+            setUsername(localUsername);
           } else {
-            // If no username found, they might be from an old session
-            const localUsername = localStorage.getItem('cookmeslow_username');
-            if (localUsername) {
-              setUsername(localUsername);
-            } else {
-              // Force them to login again to pick a username
-              await signOut(auth);
-              navigate('/');
-            }
+            // Force them to login again to pick a username
+            await signOut(auth);
+            navigate('/');
           }
         }
       }
@@ -336,7 +332,7 @@ export default function Dashboard() {
 
                 <div className="flex gap-2 mt-2">
                   <button 
-                    onClick={() => navigate(`/kitchen/${room.roomId}`)}
+                    onClick={() => navigate(`/${room.roomId}`)}
                     className="flex-1 bg-[#2a2a2a] hover:bg-[#333] text-white py-2.5 rounded-full text-sm font-bold transition-colors"
                   >
                     Enter Kitchen

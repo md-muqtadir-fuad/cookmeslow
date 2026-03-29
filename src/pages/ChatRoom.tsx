@@ -132,13 +132,18 @@ export default function ChatRoom() {
           
           // Create a new random room for this visitor
           const newRoomId = Math.random().toString(36).substring(2, 10);
+          
+          const adjectives = ['Spicy', 'Burnt', 'Sizzling', 'Smoky', 'Crispy', 'Salty', 'Sweet', 'Sour', 'Bitter', 'Tangy', 'Hot', 'Cold', 'Fresh', 'Stale', 'Greasy'];
+          const nouns = ['Soup', 'Toast', 'Steak', 'Salad', 'Pasta', 'Pizza', 'Burger', 'Taco', 'Sushi', 'Curry', 'Noodles', 'Rice', 'Stew', 'Roast', 'Grill'];
+          const randomName = `${adjectives[Math.floor(Math.random() * adjectives.length)]} ${nouns[Math.floor(Math.random() * nouns.length)]}`;
+
           await setDoc(doc(db, 'rooms', newRoomId), {
             roomId: newRoomId,
             creatorId: targetUserUid,
             guestId: currentUserId,
             status: 'active',
             createdAt: serverTimestamp(),
-            kitchenName: `${roomId}'s Kitchen`
+            kitchenName: randomName
           });
           
           navigate(`/${newRoomId}`, { replace: true });
@@ -484,7 +489,7 @@ export default function ChatRoom() {
   };
 
   const copyRoomLink = () => {
-    const link = `${window.location.origin}/kitchen/${roomId}`;
+    const link = `${window.location.origin}/${roomId}`;
     navigator.clipboard.writeText(link);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
